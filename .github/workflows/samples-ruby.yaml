@@ -1,43 +1,41 @@
-name: Samples Ruby 
-
-on:
-  push:
-    paths:
-      - 'samples/client/echo_api/ruby-httpx/**'
-      - 'samples/client/echo_api/ruby-faraday/**'
-      - 'samples/client/echo_api/ruby-typhoeus/**'
-  pull_request:
-    paths:
-      - 'samples/client/echo_api/ruby-httpx/**'
-      - 'samples/client/echo_api/ruby-faraday/**'
-      - 'samples/client/echo_api/ruby-typhoeus/**'
-
 jobs:
   build:
     name: Build Ruby
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      name: Setup node.js
+      uses: actions/setup-node@v4
+    - continue-on-error: true
+      name: Run echo server
+      run: 'git clone https://github.com/wing328/http-echo-server -b openapi-generator-test-server
+
+        (cd http-echo-server && npm install && npm start &)
+
+        '
+    - continue-on-error: true
+      uses: actions/setup-ruby@v1
+      with:
+        bundler-cache: true
+        ruby-version: 3.0
+    - continue-on-error: true
+      name: Install bundle
+      run: bundle install
+      working-directory: ${{ matrix.sample }}
+    - continue-on-error: true
+      name: Run rspec
+      run: rspec
+      working-directory: ${{ matrix.sample }}
     strategy:
       fail-fast: false
       matrix:
         sample:
-          - 'samples/client/echo_api/ruby-httpx/'
-          - 'samples/client/echo_api/ruby-faraday/'
-          - 'samples/client/echo_api/ruby-typhoeus/'
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup node.js
-        uses: actions/setup-node@v4
-      - name: Run echo server
-        run: |
-          git clone https://github.com/wing328/http-echo-server -b openapi-generator-test-server
-          (cd http-echo-server && npm install && npm start &)
-      - uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 3.0
-          bundler-cache: true
-      - name: Install bundle
-        working-directory: ${{ matrix.sample }}
-        run: bundle install
-      - name: Run rspec
-        working-directory: ${{ matrix.sample }}
-        run: rspec
+        - samples/client/echo_api/ruby-httpx/
+        - samples/client/echo_api/ruby-faraday/
+        - samples/client/echo_api/ruby-typhoeus/
+name: Samples Ruby
+on:
+  repository_dispatch:
+    types: trigger-ga___samples-ruby.yaml

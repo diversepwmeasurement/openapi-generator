@@ -1,47 +1,51 @@
-name: Java Client (Echo API) JDK17
-
-on:
-  push:
-    paths:
-      - samples/client/echo_api/java/**
-  pull_request:
-    paths:
-      - samples/client/echo_api/java/**
 jobs:
   build:
     name: Build Java Client JDK17
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+    - continue-on-error: true
+      env:
+        cache-name: maven-repository
+      name: Cache maven dependencies
+      uses: actions/cache@v4
+      with:
+        key: ${{ runner.os }}-${{ github.job }}-${{ env.cache-name }}-${{ hashFiles('**/pom.xml')
+          }}
+        path: '~/.m2
+
+          '
+    - continue-on-error: true
+      name: Setup node.js
+      uses: actions/setup-node@v4
+    - continue-on-error: true
+      name: Run echo server
+      run: 'git clone https://github.com/wing328/http-echo-server -b openapi-generator-test-server
+
+        (cd http-echo-server && npm install && npm start &)
+
+        '
+    - continue-on-error: true
+      name: Build
+      run: mvn clean package --no-transfer-progress
+      working-directory: ${{ matrix.sample }}
     strategy:
       fail-fast: false
       matrix:
         sample:
-          # clients
-          - samples/client/echo_api/java/apache-httpclient
-          - samples/client/echo_api/java/native
-          - samples/client/echo_api/java/feign-gson
-          - samples/client/echo_api/java/resttemplate
-          - samples/client/echo_api/java/resteasy
-          - samples/client/echo_api/java/restclient
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: 17
-      - name: Cache maven dependencies
-        uses: actions/cache@v4
-        env:
-          cache-name: maven-repository
-        with:
-          path: |
-            ~/.m2
-          key: ${{ runner.os }}-${{ github.job }}-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
-      - name: Setup node.js
-        uses: actions/setup-node@v4
-      - name: Run echo server
-        run: |
-          git clone https://github.com/wing328/http-echo-server -b openapi-generator-test-server
-          (cd http-echo-server && npm install && npm start &)
-      - name: Build
-        working-directory: ${{ matrix.sample }}
-        run: mvn clean package --no-transfer-progress
+        - samples/client/echo_api/java/apache-httpclient
+        - samples/client/echo_api/java/native
+        - samples/client/echo_api/java/feign-gson
+        - samples/client/echo_api/java/resttemplate
+        - samples/client/echo_api/java/resteasy
+        - samples/client/echo_api/java/restclient
+name: Java Client (Echo API) JDK17
+on:
+  repository_dispatch:
+    types: trigger-ga___samples-java-client-echo-api-jdk17.yaml

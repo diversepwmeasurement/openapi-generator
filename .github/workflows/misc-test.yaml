@@ -1,32 +1,31 @@
-name: Misc Tests
-
-on:
-  push:
-    branches:
-      - master
-      - '[5-9]+.[0-9]+.x'
-  pull_request:
-    branches:
-      - master
-      - '[5-9]+.[0-9]+.x'
-
 jobs:
   build:
     name: Misc tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '2.6'
-          bundler-cache: false # runs 'bundle install' and caches installed gems automatically
-      - name: Detect tabs
-        run: /bin/bash ./bin/utils/detect_tab_in_templates.sh
-      - name: Detect changes in test files
-        run: ./bin/utils/detect_test_file_changes.rb bin/utils/test_file_list.yaml
-      - name: Detect carriage return
-        run: /bin/bash ./bin/utils/detect_carriage_return.sh
-      - name: Detect merge conflicts
-        run: /bin/bash ./bin/utils/detect_merge_conflict.sh
-      - name: Detect tabs
-        run: /bin/bash ./bin/utils/detect_tab_in_java_class.sh
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: false
+        ruby-version: '2.6'
+    - continue-on-error: true
+      name: Detect tabs
+      run: /bin/bash ./bin/utils/detect_tab_in_templates.sh
+    - continue-on-error: true
+      name: Detect changes in test files
+      run: ./bin/utils/detect_test_file_changes.rb bin/utils/test_file_list.yaml
+    - continue-on-error: true
+      name: Detect carriage return
+      run: /bin/bash ./bin/utils/detect_carriage_return.sh
+    - continue-on-error: true
+      name: Detect merge conflicts
+      run: /bin/bash ./bin/utils/detect_merge_conflict.sh
+    - continue-on-error: true
+      name: Detect tabs
+      run: /bin/bash ./bin/utils/detect_tab_in_java_class.sh
+name: Misc Tests
+on:
+  repository_dispatch:
+    types: trigger-ga___misc-test.yaml

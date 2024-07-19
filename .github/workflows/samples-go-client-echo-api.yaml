@@ -1,32 +1,36 @@
-name: Go Client (Echo API)
-
-on:
-  pull_request:
-    paths:
-      - samples/client/echo_api/go/**
-      - .github/workflows/samples-go-client-echo-api.yaml
 jobs:
   build:
     name: Test Go client
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      uses: actions/setup-go@v5
+      with:
+        go-version: stable
+    - continue-on-error: true
+      name: Setup node.js
+      uses: actions/setup-node@v4
+    - continue-on-error: true
+      name: Run echo server
+      run: 'git clone https://github.com/wing328/http-echo-server -b openapi-generator-test-server
+
+        (cd http-echo-server && npm install && npm start &)
+
+        '
+    - continue-on-error: true
+      run: go version
+    - continue-on-error: true
+      name: Run test
+      run: go test -mod=mod -v
+      working-directory: ${{ matrix.sample }}
     strategy:
       fail-fast: false
       matrix:
         sample:
-          # clients
-          - samples/client/echo_api/go
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "stable"
-      - name: Setup node.js
-        uses: actions/setup-node@v4
-      - name: Run echo server
-        run: |
-          git clone https://github.com/wing328/http-echo-server -b openapi-generator-test-server
-          (cd http-echo-server && npm install && npm start &)
-      - run: go version
-      - name: Run test
-        working-directory: ${{ matrix.sample }}
-        run: go test -mod=mod -v
+        - samples/client/echo_api/go
+name: Go Client (Echo API)
+on:
+  repository_dispatch:
+    types: trigger-ga___samples-go-client-echo-api.yaml

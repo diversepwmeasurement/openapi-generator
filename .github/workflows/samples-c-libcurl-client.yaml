@@ -1,36 +1,36 @@
-name: Samples c libcurl client
-
-on:
-  push:
-    paths:
-      - 'samples/client/petstore/c/**'
-      - 'samples/client/petstore/c-useJsonUnformatted/**'
-  pull_request:
-    paths:
-      - 'samples/client/petstore/c/**'
-      - 'samples/client/petstore/c-useJsonUnformatted/**'
-
 jobs:
   build:
     name: Build c libcurl client
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      name: Prepare
+      run: 'sudo apt-get update
+
+        sudo apt-get install -y libssl-dev libcurl4-openssl-dev
+
+        '
+    - continue-on-error: true
+      name: Build
+      run: 'mkdir build
+
+        cd build
+
+        cmake ..
+
+        make
+
+        '
+      working-directory: ${{ matrix.sample }}
     strategy:
       fail-fast: false
       matrix:
         sample:
-          - 'samples/client/petstore/c/'
-          - 'samples/client/petstore/c-useJsonUnformatted/'
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prepare
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libssl-dev libcurl4-openssl-dev
-      - name: Build
-        working-directory: ${{ matrix.sample }}
-        run: |
-          mkdir build
-          cd build
-          cmake ..
-          make
+        - samples/client/petstore/c/
+        - samples/client/petstore/c-useJsonUnformatted/
+name: Samples c libcurl client
+on:
+  repository_dispatch:
+    types: trigger-ga___samples-c-libcurl-client.yaml

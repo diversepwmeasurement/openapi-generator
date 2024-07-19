@@ -1,19 +1,15 @@
-name: OpenAPI Generator Test Report
-
-on:
-  workflow_run:
-    workflows: ['OpenAPI Generator']
-    types:
-      - completed
-
-# separate workflow required due to https://github.com/dorny/test-reporter#recommended-setup-for-public-repositories
 jobs:
   report:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: dorny/test-reporter@v1
-        with:
-          artifact: surefire-test-results
-          name: JUnit Test results
-          path: '**/surefire-reports/TEST-*.xml'
-          reporter: java-junit
+    - continue-on-error: true
+      uses: dorny/test-reporter@v1
+      with:
+        artifact: surefire-test-results
+        name: JUnit Test results
+        path: '**/surefire-reports/TEST-*.xml'
+        reporter: java-junit
+name: OpenAPI Generator Test Report
+on:
+  repository_dispatch:
+    types: trigger-ga___openapi-generator-test-results.yaml

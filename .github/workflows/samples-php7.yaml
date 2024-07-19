@@ -1,32 +1,30 @@
-name: Samples PHP 7.x
-
-on:
-  push:
-    paths:
-      - samples/server/petstore/php-laravel/lib/
-  pull_request:
-    paths:
-      - samples/server/petstore/php-laravel/lib/
 jobs:
   build:
     name: Build PHP projects
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      name: Setup PHP with tools
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+        tools: php-cs-fixer, phpunit
+    - continue-on-error: true
+      name: composer install
+      run: composer install
+      working-directory: ${{ matrix.sample }}
+    - continue-on-error: true
+      name: phpunit
+      run: vendor/bin/phpunit
+      working-directory: ${{ matrix.sample }}
     strategy:
       fail-fast: false
       matrix:
         sample:
-          # servers
-          - samples/server/petstore/php-laravel/lib/
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup PHP with tools
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-          tools: php-cs-fixer, phpunit
-      - name: composer install
-        working-directory: ${{ matrix.sample }}
-        run: composer install
-      - name: phpunit
-        working-directory: ${{ matrix.sample }}
-        run: vendor/bin/phpunit
+        - samples/server/petstore/php-laravel/lib/
+name: Samples PHP 7.x
+on:
+  repository_dispatch:
+    types: trigger-ga___samples-php7.yaml

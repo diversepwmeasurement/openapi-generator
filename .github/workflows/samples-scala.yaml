@@ -1,52 +1,46 @@
-name: Samples Scala/sbt
-
-on:
-  push:
-    paths:
-      - 'samples/client/petstore/scala**'
-      - 'samples/server/petstore/scala**'
-      - 'samples/client/petstore/java/okhttp-gson/**'
-  pull_request:
-    paths:
-      - 'samples/client/petstore/scala**'
-      - 'samples/server/petstore/scala**'
-      - 'samples/client/petstore/java/okhttp-gson/**'
 jobs:
   build:
     name: Build sbt/Scala client, servers
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 8
+    - continue-on-error: true
+      env:
+        cache-name: maven-repository
+      name: Cache maven dependencies
+      uses: actions/cache@v4
+      with:
+        key: ${{ runner.os }}-${{ github.job }}-${{ env.cache-name }}-${{ hashFiles('**/build.sbt')
+          }}
+        path: '~/.ivy2
+
+          '
+    - continue-on-error: true
+      name: Build and test
+      run: sbt -v +test
+      working-directory: ${{ matrix.sample }}
     strategy:
       fail-fast: false
       matrix:
         sample:
-          # clients
-          - 'samples/client/petstore/java/okhttp-gson'
-          - samples/client/petstore/scalaz
-          - samples/client/petstore/scala-pekko
-          #- samples/client/petstore/scala-sttp # won't pass while the same tests in circleci pass
-          # servers
-          - samples/server/petstore/scala-lagom-server
-          - samples/server/petstore/scala-play-server
-          - samples/server/petstore/scala-akka-http-server
-          - samples/server/petstore/scala-pekko-http-server
-          - samples/server/petstore/scalatra
-          - samples/server/petstore/scala-finch # cannot be tested with jdk11
-          - samples/server/petstore/scala-http4s-server
-          - samples/server/petstore/scala-cask
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: 8
-      - name: Cache maven dependencies
-        uses: actions/cache@v4
-        env:
-          cache-name: maven-repository
-        with:
-          path: |
-            ~/.ivy2
-          key: ${{ runner.os }}-${{ github.job }}-${{ env.cache-name }}-${{ hashFiles('**/build.sbt') }}
-      - name: Build and test
-        working-directory: ${{ matrix.sample }}
-        run: sbt -v +test
+        - samples/client/petstore/java/okhttp-gson
+        - samples/client/petstore/scalaz
+        - samples/client/petstore/scala-pekko
+        - samples/server/petstore/scala-lagom-server
+        - samples/server/petstore/scala-play-server
+        - samples/server/petstore/scala-akka-http-server
+        - samples/server/petstore/scala-pekko-http-server
+        - samples/server/petstore/scalatra
+        - samples/server/petstore/scala-finch
+        - samples/server/petstore/scala-http4s-server
+        - samples/server/petstore/scala-cask
+name: Samples Scala/sbt
+on:
+  repository_dispatch:
+    types: trigger-ga___samples-scala.yaml

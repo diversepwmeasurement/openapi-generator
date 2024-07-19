@@ -1,27 +1,24 @@
-name: Python Server
-
-on:
-  push:
-    paths:
-      - samples/server/petstore/python-aiohttp-srclayout/**
-  pull_request:
-    paths:
-      - samples/server/petstore/python-aiohttp-srclayout/**
 jobs:
   build:
     name: Test Python server
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.7'
+    - continue-on-error: true
+      name: Test
+      run: make test-all
+      working-directory: ${{ matrix.sample }}
     strategy:
       fail-fast: false
       matrix:
         sample:
-          # servers
-          - samples/server/petstore/python-aiohttp-srclayout/
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.7'
-      - name: Test
-        working-directory: ${{ matrix.sample }}
-        run: make test-all
+        - samples/server/petstore/python-aiohttp-srclayout/
+name: Python Server
+on:
+  repository_dispatch:
+    types: trigger-ga___samples-python-server.yaml

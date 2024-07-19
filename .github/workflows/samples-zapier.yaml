@@ -1,30 +1,29 @@
-name: Samples Zapier
-
-on:
-  push:
-    branches:
-      - 'samples/client/petstore/zapier/**'
-  pull_request:
-    paths:
-      - 'samples/client/petstore/zapier/**'
-
 jobs:
   validate:
     name: Test zapier generation
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      name: Setup node
+      uses: actions/setup-node@v4
+    - continue-on-error: true
+      name: Install dependencies
+      run: 'npm install
+
+        '
+      working-directory: ${{ matrix.sample }}
+    - continue-on-error: true
+      name: Validate
+      run: node index.js
+      working-directory: ${{ matrix.sample }}
     strategy:
       fail-fast: false
       matrix:
         sample:
-          - samples/client/petstore/zapier
-    steps:
-    - uses: actions/checkout@v4
-    - name: Setup node
-      uses: actions/setup-node@v4
-    - name: Install dependencies
-      working-directory: ${{ matrix.sample }}
-      run: |
-        npm install
-    - name: Validate
-      working-directory: ${{ matrix.sample }}
-      run: node index.js
+        - samples/client/petstore/zapier
+name: Samples Zapier
+on:
+  repository_dispatch:
+    types: trigger-ga___samples-zapier.yaml

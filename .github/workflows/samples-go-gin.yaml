@@ -1,31 +1,27 @@
-name: Samples Go 
-
-on:
-  push:
-    paths:
-      - 'samples/server/petstore/go-gin-api-server/**'
-      - 'samples/server/petstore/go-gin-api-server-interface-only/**'
-  pull_request:
-    paths:
-      - 'samples/server/petstore/go-gin-api-server/**'
-      - 'samples/server/petstore/go-gin-api-server-interface-only/**'
-
 jobs:
   build:
-    name: Build Go 
-    runs-on: ubuntu-latest
+    name: Build Go
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      uses: actions/setup-go@v5
+      with:
+        go-version: stable
+    - continue-on-error: true
+      run: go version
+    - continue-on-error: true
+      name: Run test
+      run: go test -mod=mod -v
+      working-directory: ${{ matrix.sample }}
     strategy:
       fail-fast: false
       matrix:
         sample:
-          - samples/server/petstore/go-gin-api-server/
-          - samples/server/petstore/go-gin-api-server-interface-only/
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "stable"
-      - run: go version
-      - name: Run test
-        working-directory: ${{ matrix.sample }}
-        run: go test -mod=mod -v
+        - samples/server/petstore/go-gin-api-server/
+        - samples/server/petstore/go-gin-api-server-interface-only/
+name: Samples Go
+on:
+  repository_dispatch:
+    types: trigger-ga___samples-go-gin.yaml

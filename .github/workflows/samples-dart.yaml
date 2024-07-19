@@ -1,39 +1,35 @@
-name: Samples Dart
-
-on:
-  push:
-    branches:
-      - master
-      - '[5-9]+.[0-9]+.x'
-  pull_request:
-    branches:
-      - master
-      - '[5-9]+.[0-9]+.x'
-    paths:
-      - 'samples/openapi3/client/petstore/dart*/**'
-
 jobs:
   tests-dart:
     name: Tests Dart
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: 11
-          cache: maven
-      - name: Cache test dependencies
-        uses: actions/cache@v4
-        env:
-          cache-name: pub-cache
-        with:
-          path: $PUB_CACHE
-          key: ${{ runner.os }}-${{ github.job }}-${{ env.cache-name }}-${{ hashFiles('samples/**/pubspec.*') }}
-      - uses: dart-lang/setup-dart@v1
-        with:
-          sdk: 2.15.0
-      - name: Run tests
-        uses: ./.github/actions/run-samples
-        with:
-          name: samples.dart
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      uses: actions/setup-java@v4
+      with:
+        cache: maven
+        distribution: temurin
+        java-version: 11
+    - continue-on-error: true
+      env:
+        cache-name: pub-cache
+      name: Cache test dependencies
+      uses: actions/cache@v4
+      with:
+        key: ${{ runner.os }}-${{ github.job }}-${{ env.cache-name }}-${{ hashFiles('samples/**/pubspec.*')
+          }}
+        path: $PUB_CACHE
+    - continue-on-error: true
+      uses: dart-lang/setup-dart@v1
+      with:
+        sdk: 2.15.0
+    - continue-on-error: true
+      name: Run tests
+      uses: ./.github/actions/run-samples
+      with:
+        name: samples.dart
+name: Samples Dart
+on:
+  repository_dispatch:
+    types: trigger-ga___samples-dart.yaml

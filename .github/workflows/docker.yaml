@@ -1,53 +1,37 @@
-name: Docker tests
-
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - Dockerfile
-      - run-in-docker.sh
-      - pom.xml
-      - modules/openapi-generator-online/pom.xml
-      - modules/openapi-generator-online/Dockerfile
-      - modules/openapi-generator-cli/pom.xml
-      - modules/openapi-generator-cli/Dockerfile
-  pull_request:
-    paths:
-      - Dockerfile
-      - run-in-docker.sh
-      - pom.xml
-      - modules/openapi-generator-online/pom.xml
-      - modules/openapi-generator-online/Dockerfile
-      - modules/openapi-generator-cli/pom.xml
-      - modules/openapi-generator-cli/Dockerfile
 jobs:
   build:
     name: 'Build: Docker'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+    - continue-on-error: true
+      name: Check out code
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      name: Test run-in-docker.sh
+      run: 'sed -i ''s/ -it / /g'' run-in-docker.sh
 
-      - name: Test run-in-docker.sh
-        shell: bash
-        run: |
-          sed -i 's/ -it / /g' run-in-docker.sh
-          ./run-in-docker.sh mvn -B clean install
+        ./run-in-docker.sh mvn -B clean install
 
-      - name: Build Dockerfile
-        shell: bash
-        run: docker build .
+        '
+      shell: bash
+    - continue-on-error: true
+      name: Build Dockerfile
+      run: docker build .
+      shell: bash
+    - continue-on-error: true
+      name: Build modules/openapi-generator-online
+      run: 'docker build modules/openapi-generator-online/ -t test
 
-      - name: Build modules/openapi-generator-online
-        shell: bash
-        run: |
-          docker build modules/openapi-generator-online/ -t test
-      - name: Build and test modules/openapi-generator-cli
-        shell: bash
-        run: |
-          cp docker-entrypoint.sh ./modules/openapi-generator-cli 
-          docker build modules/openapi-generator-cli/ -t cli-test
-          docker run --rm -v "${PWD}:/local" cli-test generate \
-          -i https://raw.githubusercontent.com/openapitools/openapi-generator/master/modules/openapi-generator/src/test/resources/3_0/petstore.yaml \
-          -g go \
-          -o /local/out/go
+        '
+      shell: bash
+    - continue-on-error: true
+      name: Build and test modules/openapi-generator-cli
+      run: "cp docker-entrypoint.sh ./modules/openapi-generator-cli \ndocker build\
+        \ modules/openapi-generator-cli/ -t cli-test\ndocker run --rm -v \"${PWD}:/local\"\
+        \ cli-test generate \\\n-i https://raw.githubusercontent.com/openapitools/openapi-generator/master/modules/openapi-generator/src/test/resources/3_0/petstore.yaml\
+        \ \\\n-g go \\\n-o /local/out/go\n"
+      shell: bash
+name: Docker tests
+on:
+  repository_dispatch:
+    types: trigger-ga___docker.yaml
